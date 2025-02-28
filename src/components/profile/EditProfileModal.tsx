@@ -7,9 +7,11 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { FaUserCircle, FaCamera } from 'react-icons/fa';
-import { auth, storage } from '@/lib/firebase';
+import { auth, storage, db } from '@/lib/firebase';
 import { updateProfile } from 'firebase/auth';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { doc, updateDoc } from 'firebase/firestore';
+import { useSession } from 'next-auth/react';
 import { Loader2, CheckCircle } from 'lucide-react';
 
 interface EditProfileModalProps {
@@ -19,18 +21,19 @@ interface EditProfileModalProps {
 }
 
 export default function EditProfileModal({ user, isOpen, onClose }: EditProfileModalProps) {
-  const [name, setName] = useState(user.name || '');
+  const { update: updateSession } = useSession();
+  const [name, setName] = useState(user.name ?? '');
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(user.image);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(user.image ?? null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const resetState = useCallback(() => {
-    setName(user.name || '');
+    setName(user.name ?? '');
     setImageFile(null);
-    setPreviewUrl(user.image);
+    setPreviewUrl(user.image ?? null);
     setError(null);
     setSaveSuccess(false);
   }, [user.name, user.image]);
@@ -58,52 +61,97 @@ export default function EditProfileModal({ user, isOpen, onClose }: EditProfileM
     setSaveSuccess(false);
 
     try {
-      const currentUser = auth.currentUser;
-      if (!currentUser) {
+      const firebaseUser = auth.currentUser;
+      if (!firebaseUser) {
         setError('Please sign in again');
         setIsLoading(false);
         return;
       }
 
-      // First upload the image if there's a new one
       let photoURL = user.image || '';
+
+      // Handle image upload if there's a new image
       if (imageFile) {
         try {
-          const imageRef = ref(storage, `profile-pictures/${currentUser.uid}`);
-          const uploadResult = await uploadBytes(imageRef, imageFile);
-          photoURL = await getDownloadURL(uploadResult.ref);
-        } catch (error) {
-          console.error('Error uploading image:', error);
+          // Create storage reference with timestamp to avoid caching
+          const timestamp = Date.now();
+          const storageRef = ref(storage, `profile-pictures/${firebaseUser.uid}_${timestamp}`);
+
+          // Upload the file with metadata
+          const metadata = {
+            contentType: imageFile.type,
+            customMetadata: {
+              'uploadedBy': firebaseUser.uid,
+              'uploadedAt': new Date().toISOString()
+            }
+          };
+
+          // Upload file with metadata
+          await uploadBytes(storageRef, imageFile, metadata);
+
+          // Get the download URL and wait for it
+          photoURL = await getDownloadURL(storageRef);
+
+          if (!photoURL) {
+            throw new Error('Failed to get download URL');
+          }
+
+          console.log('Image uploaded successfully:', photoURL);
+        } catch (uploadError: any) {
+          console.error('Error uploading image:', uploadError);
           setError('Failed to upload image. Please try again.');
           setIsLoading(false);
           return;
         }
       }
 
-      // Then update the profile
+      // Update Firebase Auth profile
       try {
-        await updateProfile(currentUser, {
+        await updateProfile(firebaseUser, {
           displayName: name,
           photoURL: photoURL,
         });
-
-        // Update successful
-        setSaveSuccess(true);
-
-        // Wait a moment to show success state
-        setTimeout(() => {
-          onClose();
-          // Force a hard refresh to ensure all components update
-          window.location.reload();
-        }, 1500);
-      } catch (error) {
-        console.error('Error updating profile:', error);
+      } catch (profileError: any) {
+        console.error('Error updating Firebase profile:', profileError);
         setError('Failed to update profile. Please try again.');
         setIsLoading(false);
+        return;
       }
-    } catch (error) {
-      console.error('Error in submit handler:', error);
-      setError('An unexpected error occurred. Please try again.');
+
+      // Update Firestore document
+      try {
+        const userRef = doc(db, 'users', firebaseUser.uid);
+        await updateDoc(userRef, {
+          name: name,
+          image: photoURL,
+          updatedAt: new Date(),
+        });
+      } catch (firestoreError: any) {
+        console.error('Error updating Firestore:', firestoreError);
+        // Continue even if Firestore update fails
+      }
+
+      // Update NextAuth session
+      try {
+        await updateSession({
+          user: {
+            name: name,
+            image: photoURL,
+          }
+        });
+      } catch (sessionError: any) {
+        console.error('Error updating session:', sessionError);
+        // Continue even if session update fails
+      }
+
+      setSaveSuccess(true);
+      setTimeout(() => {
+        onClose();
+        window.location.reload();
+      }, 1500);
+    } catch (error: any) {
+      console.error('Error in save process:', error);
+      setError(error.message || 'An unexpected error occurred. Please try again.');
       setIsLoading(false);
     }
   };

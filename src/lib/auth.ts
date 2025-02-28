@@ -1,6 +1,6 @@
 import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
-import { db } from "@/lib/firebase";
+import { db } from "@/lib/firebase/config";
 import { doc, getDoc } from "firebase/firestore";
 
 export const authOptions: NextAuthOptions = {
@@ -12,7 +12,7 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async session({ session, token }) {
-      if (session?.user && token?.sub) {
+      if (session?.user && token?.sub && db) {
         // Get the user's data from Firestore
         const userRef = doc(db, "users", token.sub);
         const userSnap = await getDoc(userRef);
@@ -35,6 +35,15 @@ export const authOptions: NextAuthOptions = {
             wasteSaved: 0,
           };
         }
+      } else if (session?.user && token?.sub) {
+        // If db is not available, still set the user ID
+        session.user = {
+          ...session.user,
+          id: token.sub,
+          points: 0,
+          co2Saved: 0,
+          wasteSaved: 0,
+        };
       }
       return session;
     },

@@ -1,120 +1,104 @@
-### Overview
+# Sustainability Leaderboard App
 
-Goal: Create a smart, gamified app to encourage students to adopt sustainable behaviors through tracking, leaderboards, and AI-powered insights.
+A Next.js application for tracking sustainability efforts, participating in eco-challenges, and learning about environmental impact.
 
-## Key Features:
-✅ Gamification (leaderboard, badges, rewards)✅ AI-powered insights (CO₂ savings, waste reduction)✅ Smart tracking (QR scanning, AI waste recognition)✅ Community & engagement (challenges, events, forum)
+## Features
 
-2. Core Modules & Features
+- User authentication with NextAuth.js and Firebase
+- Sustainability challenges and leaderboard
+- AI-powered EcoBot assistant for sustainability tips
+- Waste recognition using AI vision
+- Impact metrics tracking
+- Community discussion
 
-1️⃣ User Management & Profiles
+## Getting Started
 
-Sign-up/Login (Google, school ID, email)
+### Prerequisites
 
-Personal sustainability stats (points, badges, challenges completed)
+- Node.js 18.x or later
+- npm or yarn
+- Firebase account
+- OpenAI API key
 
-Customizable profile avatar
+### Installation
 
-2️⃣ Leaderboard & Gamification
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/sustainability-leaderboard-app.git
+   cd sustainability-leaderboard-app
+   ```
 
-Global & class-specific leaderboards
+2. Install dependencies:
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```
 
-Badge & rewards system
+3. Create a `.env.local` file in the root directory with the following variables:
+   ```
+   # Firebase configuration
+   NEXT_PUBLIC_FIREBASE_API_KEY=your_firebase_api_key
+   NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_firebase_auth_domain
+   NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_firebase_project_id
+   NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_firebase_storage_bucket
+   NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_firebase_messaging_sender_id
+   NEXT_PUBLIC_FIREBASE_APP_ID=your_firebase_app_id
 
-AI-driven goal recommendations
+   # NextAuth.js configuration
+   GOOGLE_CLIENT_ID=your_google_client_id
+   GOOGLE_CLIENT_SECRET=your_google_client_secret
+   NEXTAUTH_URL=http://localhost:3000
+   NEXTAUTH_SECRET=your_nextauth_secret
 
-3️⃣ Activity Tracking & Smart Challenges
+   # OpenAI API key (required for EcoBot and Waste Recognition)
+   OPENAI_API_KEY=your_openai_api_key
+   ```
 
-Manual action logging (bike-to-school, recycling, etc.)
+4. Start the development server:
+   ```bash
+   npm run dev
+   # or
+   yarn dev
+   ```
 
-QR code scanning for validation
+5. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-AI-powered image recognition for waste sorting
+## Setting Up OpenAI API Key
 
-4️⃣ Real-time Impact Visualization & Analytics
+The EcoBot assistant and Waste Recognition features require an OpenAI API key to function properly. Follow these steps to set up your API key:
 
-Progress bars for individual & class impact
+1. Create an account on [OpenAI's platform](https://platform.openai.com/signup)
+2. Navigate to the [API keys section](https://platform.openai.com/api-keys)
+3. Create a new API key
+4. Copy the API key (it starts with `sk-`)
+5. Add it to your `.env.local` file:
+   ```
+   OPENAI_API_KEY=sk-your_openai_api_key
+   ```
 
-CO₂ savings, plastic waste reduction graphs
+**Note:** The Waste Recognition feature uses the GPT-4 Vision model, which requires a paid OpenAI account with access to GPT-4 Vision.
 
-Integration with school smart meters (if available)
+## Firebase Setup
 
-5️⃣ Community & Social Features
+1. Create a new Firebase project at [Firebase Console](https://console.firebase.google.com/)
+2. Enable Authentication (Google provider and Email/Password)
+3. Create a Firestore database
+4. Add your Firebase configuration to the `.env.local` file
 
-Student forum & discussion boards
+## Contributing
 
-AI-powered eco-chatbot
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-Events calendar (eco workshops, sustainability challenges)
+## License
 
-3. App Structure & Wireframe Overview
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-1️⃣ 🏠 Home Dashboard → Overview of points, leaderboard, challenges2️⃣ 📊 Leaderboard → Class & global ranking3️⃣ ⚡ My Impact → Graphs of CO₂ saved, plastic reduced4️⃣ 🎮 Challenges & Actions → Earn points by logging actions5️⃣ 💬 Community → Forum, events, AI chatbot
+## Acknowledgements
 
-4. Tech Stack Recommendations
-
-Feature
-
-Tech Stack Suggestion
-
-Frontend UI
-
-React / Next.js
-
-Backend Database
-
-Firebase / PostgreSQL
-
-Gamification
-
-Firestore for points, badges logic
-
-Image Recognition
-
-Google Vision API
-
-QR Code Tracking
-
-QR Code API
-
-AI Chatbot
-
-OpenAI API
-
-Data Visualization
-
-Recharts (Graphs)
-
-5. Development Roadmap
-
-1️⃣ Phase 1: MVP Development
-
-Implement user authentication & profiles
-
-Develop leaderboard & points system
-
-Set up manual logging of sustainability actions
-
-2️⃣ Phase 2: Gamification & Analytics
-
-Introduce challenges, rewards, and badges
-
-Integrate sustainability impact graphs
-
-3️⃣ Phase 3: AI & Smart Features
-
-Implement QR code tracking
-
-Add AI image recognition for waste sorting
-
-Launch AI-powered chatbot
-
-4️⃣ Phase 4: Community & Engagement
-
-Develop student forum & events section
-
-Integrate with school energy data
-
-6. Next Steps
-
-📌 Design UI wireframes for key screens📌 Define database schema for user profiles, points, challenges📌 Start coding MVP (leaderboard + manual logging)
+- [Next.js](https://nextjs.org/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [Firebase](https://firebase.google.com/)
+- [OpenAI](https://openai.com/)
+- [Heroicons](https://heroicons.com/)
+- [Lucide Icons](https://lucide.dev/)

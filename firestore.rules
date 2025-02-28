@@ -61,8 +61,16 @@ service cloud.firestore {
     // Challenges collection
     match /challenges/{challengeId} {
       allow read: if isAuthenticated();
-      // Only admins can create/update challenges (we'll implement admin roles later)
-      allow write: if false;
+      // Allow authenticated users to create challenges
+      allow create: if isAuthenticated();
+      // Allow users to update challenges they created
+      allow update: if isAuthenticated() && (
+        resource.data.createdBy == request.auth.uid ||
+        // Allow participants to update their progress
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['metrics', 'participants'])
+      );
+      // Only creators can delete challenges
+      allow delete: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
     }
 
     // User challenges collection

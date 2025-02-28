@@ -7,8 +7,10 @@ import { createUser, getUser } from "@/lib/firebase/db"
 import { User, Badge } from "@/types"
 import { authOptions } from '@/lib/auth'
 
-// Set Firebase persistence to LOCAL
-setPersistence(auth, browserLocalPersistence).catch(console.error);
+// Set Firebase persistence to LOCAL if auth is initialized
+if (auth) {
+  setPersistence(auth, browserLocalPersistence).catch(console.error);
+}
 
 if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
   throw new Error('Missing Google OAuth credentials');

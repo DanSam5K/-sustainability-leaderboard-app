@@ -14,6 +14,8 @@ const navigation = [
   { name: 'Leaderboard', href: '/leaderboard' },
   { name: 'Challenges', href: '/challenges' },
   { name: 'Community', href: '/community' },
+  { name: 'Eco Assistant', href: '/eco-assistant' },
+  { name: 'Waste Recognition', href: '/waste-recognition' },
 ];
 
 export default function Navigation() {
@@ -40,8 +42,8 @@ export default function Navigation() {
                       key={item.name}
                       href={item.href}
                       className={`${isActive
-                          ? 'bg-green-900 text-white'
-                          : 'text-gray-300 hover:bg-green-700 hover:text-white'
+                        ? 'bg-green-900 text-white'
+                        : 'text-gray-300 hover:bg-green-700 hover:text-white'
                         } px-3 py-2 rounded-md text-sm font-medium`}
                       aria-current={isActive ? 'page' : undefined}
                     >
