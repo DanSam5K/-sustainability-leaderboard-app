@@ -1,57 +1,190 @@
-export default function Leaderboard() {
-  return (
-    <div className="space-y-6">
-      <div className="bg-white shadow rounded-lg p-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">Leaderboard</h1>
-        <p className="text-gray-600">See how you rank against other eco-warriors!</p>
+'use client';
+
+import React from 'react';
+import { useAuthContext } from '@/components/auth/AuthProvider';
+import { getLeaderboard } from '@/lib/firebase/db';
+import { LeaderboardEntry } from '@/types';
+import CheckBadgeIcon from '@heroicons/react/24/outline/CheckBadgeIcon';
+
+export default function LeaderboardPage() {
+  const { user } = useAuthContext();
+  const [leaderboard, setLeaderboard] = React.useState<LeaderboardEntry[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    const loadLeaderboard = async () => {
+      if (!user) {
+        setLoading(false);
+        setError('Please sign in to view the leaderboard');
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await getLeaderboard(10);
+        if (!data || data.length === 0) {
+          setError('No leaderboard data available');
+          setLeaderboard([]);
+        } else {
+          setLeaderboard(data);
+        }
+      } catch (error) {
+        console.error('Error loading leaderboard:', error);
+        setError('Failed to load leaderboard data. Please try again later.');
+        setLeaderboard([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadLeaderboard();
+  }, [user]);
+
+  if (!user) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh] p-4">
+        <p className="text-lg text-gray-600">Please sign in to view the leaderboard</p>
       </div>
+    );
+  }
 
-      <div className="bg-white shadow rounded-lg p-6">
-        <div className="space-y-4">
-          {/* Top 3 Leaders */}
-          <div className="flex justify-center items-end space-x-8 mb-8">
-            {/* Second Place */}
-            <div className="text-center">
-              <div className="w-20 h-24 bg-gray-100 rounded-t-lg flex items-center justify-center">
-                <span className="text-2xl">🥈</span>
-              </div>
-              <p className="mt-2 font-semibold">Emma</p>
-              <p className="text-sm text-gray-600">850 pts</p>
-            </div>
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh] p-4">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500"></div>
+        <p className="mt-4 text-gray-600">Loading leaderboard...</p>
+      </div>
+    );
+  }
 
-            {/* First Place */}
-            <div className="text-center">
-              <div className="w-20 h-32 bg-gray-100 rounded-t-lg flex items-center justify-center">
-                <span className="text-2xl">🥇</span>
-              </div>
-              <p className="mt-2 font-semibold">Alex</p>
-              <p className="text-sm text-gray-600">920 pts</p>
-            </div>
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh] p-4">
+        <p className="text-lg text-red-600">{error}</p>
+      </div>
+    );
+  }
 
-            {/* Third Place */}
-            <div className="text-center">
-              <div className="w-20 h-20 bg-gray-100 rounded-t-lg flex items-center justify-center">
-                <span className="text-2xl">🥉</span>
-              </div>
-              <p className="mt-2 font-semibold">James</p>
-              <p className="text-sm text-gray-600">780 pts</p>
-            </div>
-          </div>
+  if (!leaderboard || leaderboard.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh] p-4">
+        <p className="text-lg text-gray-600">No leaderboard data available</p>
+      </div>
+    );
+  }
 
-          {/* Leaderboard List */}
-          <div className="space-y-2">
-            {[4, 5, 6, 7, 8].map((position) => (
-              <div key={position} className="flex items-center justify-between p-4 hover:bg-gray-50 rounded-lg">
-                <div className="flex items-center space-x-4">
-                  <span className="w-8 text-center text-gray-500">#{position}</span>
-                  <span className="font-medium">User {position}</span>
-                </div>
-                <span className="text-gray-600">{1000 - position * 50} pts</span>
-              </div>
-            ))}
-          </div>
+  const getRankColor = (rank: number) => {
+    switch (rank) {
+      case 1:
+        return 'text-yellow-600';
+      case 2:
+        return 'text-gray-500';
+      case 3:
+        return 'text-amber-700';
+      default:
+        return 'text-gray-700';
+    }
+  };
+
+  const getRankEmoji = (rank: number) => {
+    switch (rank) {
+      case 1:
+        return '🥇';
+      case 2:
+        return '🥈';
+      case 3:
+        return '🥉';
+      default:
+        return rank;
+    }
+  };
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Sustainability Leaderboard
+          </h1>
+          <p className="text-gray-700 mt-2">
+            See how you rank among other eco-warriors
+          </p>
         </div>
       </div>
+
+      <div className="bg-white rounded-lg shadow overflow-hidden">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                Rank
+              </th>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                User
+              </th>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                Points
+              </th>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                Badges
+              </th>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                Impact Score
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {leaderboard.map((entry, index) => (
+              <tr
+                key={entry.id}
+                className={entry.id === user?.id ? 'bg-green-50' : undefined}
+              >
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <span className={`text-lg font-bold ${getRankColor(index + 1)}`}>
+                    {getRankEmoji(index + 1)}
+                  </span>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="flex items-center">
+                    {entry.image && (
+                      <img
+                        className="h-10 w-10 rounded-full"
+                        src={entry.image}
+                        alt={entry.name}
+                      />
+                    )}
+                    <div className="ml-4">
+                      <div className="text-sm font-medium text-gray-900">
+                        {entry.name}
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm text-gray-700">{entry.points}</div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="flex space-x-1">
+                    {Array.isArray(entry.badges) ? entry.badges.map((badge, i) => (
+                      <div key={i} title={badge}>
+                        <CheckBadgeIcon
+                          className="h-5 w-5 text-green-600"
+                          aria-label={badge}
+                        />
+                      </div>
+                    )) : null}
+                  </div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                  {entry.sustainabilityScore}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
-  )
+  );
 } 

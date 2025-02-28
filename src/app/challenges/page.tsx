@@ -1,93 +1,172 @@
-export default function Challenges() {
+'use client';
+
+import React from 'react';
+import { useAuthContext } from '@/components/auth/AuthProvider';
+import { getActiveChallenges } from '@/lib/firebase/db';
+import { Challenge } from '@/types';
+import BoltIcon from '@heroicons/react/24/outline/BoltIcon';
+import UserGroupIcon from '@heroicons/react/24/outline/UserGroupIcon';
+import ClockIcon from '@heroicons/react/24/outline/ClockIcon';
+import ChartBarIcon from '@heroicons/react/24/outline/ChartBarIcon';
+
+export default function ChallengesPage() {
+  const { user } = useAuthContext();
+  const [challenges, setChallenges] = React.useState<Challenge[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    const loadChallenges = async () => {
+      if (!user) {
+        setLoading(false);
+        setError('Please sign in to view challenges');
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await getActiveChallenges();
+        setChallenges(data);
+      } catch (error) {
+        console.error('Error loading challenges:', error);
+        setError('Failed to load challenges. Please try again later.');
+        setChallenges([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadChallenges();
+  }, [user]);
+
+  if (!user) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh] p-4">
+        <p className="text-lg text-gray-600">Please sign in to view challenges</p>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh] p-4">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500"></div>
+        <p className="mt-4 text-gray-600">Loading challenges...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh] p-4">
+        <p className="text-lg text-red-600">{error}</p>
+      </div>
+    );
+  }
+
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case 'water':
+        return 'text-blue-700 bg-blue-100';
+      case 'energy':
+        return 'text-yellow-700 bg-yellow-100';
+      case 'waste':
+        return 'text-red-700 bg-red-100';
+      case 'transport':
+        return 'text-green-700 bg-green-100';
+      default:
+        return 'text-gray-700 bg-gray-100';
+    }
+  };
+
   return (
-    <div className="space-y-6">
-      <div className="bg-white shadow rounded-lg p-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">Challenges</h1>
-        <p className="text-gray-600">Take on sustainability challenges and earn points!</p>
-      </div>
-
-      {/* Active Challenges */}
-      <div className="bg-white shadow rounded-lg p-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Active Challenges</h2>
-        <div className="grid gap-4">
-          <div className="border border-green-200 rounded-lg p-4">
-            <div className="flex justify-between items-start">
-              <div>
-                <h3 className="font-semibold text-lg">Bike to School Week</h3>
-                <p className="text-gray-600 text-sm mt-1">Use your bike for transportation this week</p>
-              </div>
-              <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">In Progress</span>
-            </div>
-            <div className="mt-4">
-              <div className="w-full bg-gray-200 rounded-full h-2.5">
-                <div className="bg-green-600 h-2.5 rounded-full" style={{ width: '45%' }}></div>
-              </div>
-              <div className="flex justify-between mt-2 text-sm text-gray-500">
-                <span>3/7 days</span>
-                <span>50 pts</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="border border-yellow-200 rounded-lg p-4">
-            <div className="flex justify-between items-start">
-              <div>
-                <h3 className="font-semibold text-lg">Zero Waste Challenge</h3>
-                <p className="text-gray-600 text-sm mt-1">Minimize your waste production</p>
-              </div>
-              <span className="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded">Just Started</span>
-            </div>
-            <div className="mt-4">
-              <div className="w-full bg-gray-200 rounded-full h-2.5">
-                <div className="bg-yellow-400 h-2.5 rounded-full" style={{ width: '15%' }}></div>
-              </div>
-              <div className="flex justify-between mt-2 text-sm text-gray-500">
-                <span>1/7 days</span>
-                <span>75 pts</span>
-              </div>
-            </div>
-          </div>
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Sustainability Challenges
+          </h1>
+          <p className="text-gray-700 mt-2">
+            Join challenges and make a difference together
+          </p>
         </div>
+        {user && (
+          <button className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">
+            Create Challenge
+          </button>
+        )}
       </div>
 
-      {/* Available Challenges */}
-      <div className="bg-white shadow rounded-lg p-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Available Challenges</h2>
-        <div className="grid gap-4">
-          <div className="border border-gray-200 rounded-lg p-4 hover:border-blue-200 transition-colors cursor-pointer">
-            <div className="flex justify-between items-start">
-              <div>
-                <h3 className="font-semibold text-lg">Energy Saver</h3>
-                <p className="text-gray-600 text-sm mt-1">Reduce your energy consumption for a week</p>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {challenges.map((challenge) => (
+          <div
+            key={challenge.id}
+            className="bg-white rounded-lg shadow-md overflow-hidden"
+          >
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <span
+                  className={`px-3 py-1 rounded-full text-sm font-medium ${getCategoryColor(
+                    challenge.category
+                  )}`}
+                >
+                  {challenge.category.charAt(0).toUpperCase() +
+                    challenge.category.slice(1)}
+                </span>
+                <span className="text-2xl font-bold text-green-600">
+                  {challenge.points} pts
+                </span>
               </div>
-              <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">100 pts</span>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                {challenge.title}
+              </h3>
+              <p className="text-gray-700 mb-4">{challenge.description}</p>
+              <div className="space-y-3">
+                <div className="flex items-center text-gray-700">
+                  <UserGroupIcon className="w-5 h-5 mr-2" />
+                  <span>{challenge.participants.length} participants</span>
+                </div>
+                <div className="flex items-center text-gray-700">
+                  <ClockIcon className="w-5 h-5 mr-2" />
+                  <span>
+                    Ends {new Date(challenge.endDate).toLocaleDateString()}
+                  </span>
+                </div>
+                {challenge.metrics && (
+                  <div className="flex items-center text-gray-700">
+                    <ChartBarIcon className="w-5 h-5 mr-2" />
+                    <span>{challenge.metrics.completionRate}% completed</span>
+                  </div>
+                )}
+              </div>
+              <div className="mt-6">
+                <button
+                  className={`w-full py-2 px-4 rounded-lg font-medium ${challenge.participants.includes(user?.id || '')
+                    ? 'bg-gray-100 text-gray-600'
+                    : 'bg-green-500 text-white hover:bg-green-600'
+                    }`}
+                  disabled={challenge.participants.includes(
+                    user?.id || ''
+                  )}
+                >
+                  {challenge.participants.includes(user?.id || '')
+                    ? 'Joined'
+                    : 'Join Challenge'}
+                </button>
+              </div>
             </div>
-            <button className="mt-4 text-blue-600 hover:text-blue-800 font-medium text-sm">Start Challenge →</button>
           </div>
+        ))}
+      </div>
 
-          <div className="border border-gray-200 rounded-lg p-4 hover:border-blue-200 transition-colors cursor-pointer">
-            <div className="flex justify-between items-start">
-              <div>
-                <h3 className="font-semibold text-lg">Meatless Monday</h3>
-                <p className="text-gray-600 text-sm mt-1">Go vegetarian every Monday for a month</p>
-              </div>
-              <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">150 pts</span>
-            </div>
-            <button className="mt-4 text-blue-600 hover:text-blue-800 font-medium text-sm">Start Challenge →</button>
-          </div>
-
-          <div className="border border-gray-200 rounded-lg p-4 hover:border-blue-200 transition-colors cursor-pointer">
-            <div className="flex justify-between items-start">
-              <div>
-                <h3 className="font-semibold text-lg">Water Guardian</h3>
-                <p className="text-gray-600 text-sm mt-1">Track and reduce your water consumption</p>
-              </div>
-              <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">125 pts</span>
-            </div>
-            <button className="mt-4 text-blue-600 hover:text-blue-800 font-medium text-sm">Start Challenge →</button>
-          </div>
+      {challenges.length === 0 && (
+        <div className="text-center py-12">
+          <BoltIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-gray-900">No Active Challenges</h3>
+          <p className="text-gray-500">Check back later for new challenges</p>
         </div>
-      </div>
+      )}
     </div>
-  )
+  );
 } 

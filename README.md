@@ -1,36 +1,120 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+### Overview
 
-## Getting Started
+Goal: Create a smart, gamified app to encourage students to adopt sustainable behaviors through tracking, leaderboards, and AI-powered insights.
 
-First, run the development server:
+## Key Features:
+✅ Gamification (leaderboard, badges, rewards)✅ AI-powered insights (CO₂ savings, waste reduction)✅ Smart tracking (QR scanning, AI waste recognition)✅ Community & engagement (challenges, events, forum)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+2. Core Modules & Features
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+1️⃣ User Management & Profiles
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Sign-up/Login (Google, school ID, email)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Personal sustainability stats (points, badges, challenges completed)
 
-## Learn More
+Customizable profile avatar
 
-To learn more about Next.js, take a look at the following resources:
+2️⃣ Leaderboard & Gamification
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Global & class-specific leaderboards
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Badge & rewards system
 
-## Deploy on Vercel
+AI-driven goal recommendations
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+3️⃣ Activity Tracking & Smart Challenges
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Manual action logging (bike-to-school, recycling, etc.)
+
+QR code scanning for validation
+
+AI-powered image recognition for waste sorting
+
+4️⃣ Real-time Impact Visualization & Analytics
+
+Progress bars for individual & class impact
+
+CO₂ savings, plastic waste reduction graphs
+
+Integration with school smart meters (if available)
+
+5️⃣ Community & Social Features
+
+Student forum & discussion boards
+
+AI-powered eco-chatbot
+
+Events calendar (eco workshops, sustainability challenges)
+
+3. App Structure & Wireframe Overview
+
+1️⃣ 🏠 Home Dashboard → Overview of points, leaderboard, challenges2️⃣ 📊 Leaderboard → Class & global ranking3️⃣ ⚡ My Impact → Graphs of CO₂ saved, plastic reduced4️⃣ 🎮 Challenges & Actions → Earn points by logging actions5️⃣ 💬 Community → Forum, events, AI chatbot
+
+4. Tech Stack Recommendations
+
+Feature
+
+Tech Stack Suggestion
+
+Frontend UI
+
+React / Next.js
+
+Backend Database
+
+Firebase / PostgreSQL
+
+Gamification
+
+Firestore for points, badges logic
+
+Image Recognition
+
+Google Vision API
+
+QR Code Tracking
+
+QR Code API
+
+AI Chatbot
+
+OpenAI API
+
+Data Visualization
+
+Recharts (Graphs)
+
+5. Development Roadmap
+
+1️⃣ Phase 1: MVP Development
+
+Implement user authentication & profiles
+
+Develop leaderboard & points system
+
+Set up manual logging of sustainability actions
+
+2️⃣ Phase 2: Gamification & Analytics
+
+Introduce challenges, rewards, and badges
+
+Integrate sustainability impact graphs
+
+3️⃣ Phase 3: AI & Smart Features
+
+Implement QR code tracking
+
+Add AI image recognition for waste sorting
+
+Launch AI-powered chatbot
+
+4️⃣ Phase 4: Community & Engagement
+
+Develop student forum & events section
+
+Integrate with school energy data
+
+6. Next Steps
+
+📌 Design UI wireframes for key screens📌 Define database schema for user profiles, points, challenges📌 Start coding MVP (leaderboard + manual logging)

@@ -1,96 +1,123 @@
-export default function Impact() {
+'use client';
+
+import React from 'react';
+import { useAuthContext } from '@/components/auth/AuthProvider';
+import ImpactChart from '@/components/charts/ImpactChart';
+import { getUserImpactMetrics } from '@/lib/firebase/db';
+import { ImpactMetric } from '@/types';
+import BeakerIcon from '@heroicons/react/24/outline/BeakerIcon';
+import LightBulbIcon from '@heroicons/react/24/outline/LightBulbIcon';
+import TrashIcon from '@heroicons/react/24/outline/TrashIcon';
+import TruckIcon from '@heroicons/react/24/outline/TruckIcon';
+
+const categories = [
+  { name: 'water', icon: BeakerIcon, color: 'blue' },
+  { name: 'energy', icon: LightBulbIcon, color: 'yellow' },
+  { name: 'waste', icon: TrashIcon, color: 'red' },
+  { name: 'transport', icon: TruckIcon, color: 'green' },
+];
+
+export default function ImpactPage() {
+  const { user } = useAuthContext();
+  const [metrics, setMetrics] = React.useState<ImpactMetric[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    const loadMetrics = async () => {
+      if (!user) {
+        setLoading(false);
+        setError('Please sign in to view your impact metrics');
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+        const userMetrics = await getUserImpactMetrics(user.id);
+        setMetrics(userMetrics);
+      } catch (error) {
+        console.error('Error loading metrics:', error);
+        setError('Failed to load impact metrics. Please try again later.');
+        setMetrics([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadMetrics();
+  }, [user]);
+
+  if (!user) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh] p-4">
+        <p className="text-lg text-gray-700">Please sign in to view your impact metrics</p>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh] p-4">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+        <p className="mt-4 text-gray-700">Loading impact metrics...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh] p-4">
+        <p className="text-lg text-red-600">{error}</p>
+      </div>
+    );
+  }
+
+  const calculateTotalImpact = (category: string) => {
+    return metrics
+      .filter((metric) => metric.category === category)
+      .reduce((total, metric) => total + metric.value, 0);
+  };
+
   return (
-    <div className="space-y-6">
-      <div className="bg-white shadow rounded-lg p-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">My Impact</h1>
-        <p className="text-gray-600">Track your environmental impact and sustainability achievements</p>
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Your Environmental Impact
+          </h1>
+          <p className="text-gray-700 mt-2">
+            Track your sustainability progress
+          </p>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* CO2 Savings */}
-        <div className="bg-white shadow rounded-lg p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">CO₂ Savings</h2>
-          <div className="space-y-4">
-            <div className="h-48 bg-gray-50 rounded-lg flex items-center justify-center">
-              <p className="text-gray-500">CO₂ Savings Chart Placeholder</p>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm text-gray-500">This Week</p>
-                <p className="text-2xl font-bold text-green-600">25 kg</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Total</p>
-                <p className="text-2xl font-bold text-green-600">125 kg</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Waste Reduction */}
-        <div className="bg-white shadow rounded-lg p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Waste Reduction</h2>
-          <div className="space-y-4">
-            <div className="h-48 bg-gray-50 rounded-lg flex items-center justify-center">
-              <p className="text-gray-500">Waste Reduction Chart Placeholder</p>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm text-gray-500">Plastic Saved</p>
-                <p className="text-2xl font-bold text-blue-600">5 kg</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Items Recycled</p>
-                <p className="text-2xl font-bold text-blue-600">42</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Achievements */}
-        <div className="bg-white shadow rounded-lg p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Achievements</h2>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="p-4 bg-gray-50 rounded-lg text-center">
-              <span className="text-2xl">🌱</span>
-              <p className="mt-2 font-medium">Green Starter</p>
-              <p className="text-sm text-gray-500">First eco-action</p>
-            </div>
-            <div className="p-4 bg-gray-50 rounded-lg text-center">
-              <span className="text-2xl">🚲</span>
-              <p className="mt-2 font-medium">Cycle Champion</p>
-              <p className="text-sm text-gray-500">10 bike rides</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Recent Actions */}
-        <div className="bg-white shadow rounded-lg p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Recent Actions</h2>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-2">
-              <div className="flex items-center space-x-3">
-                <span className="text-xl">♻️</span>
-                <div>
-                  <p className="font-medium">Recycled Materials</p>
-                  <p className="text-sm text-gray-500">2 hours ago</p>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {categories.map((category) => {
+          const Icon = category.icon;
+          const total = calculateTotalImpact(category.name);
+          return (
+            <div
+              key={category.name}
+              className="bg-white rounded-lg shadow-md p-6"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <Icon className={`h-8 w-8 text-${category.color}-600`} />
+                  <h3 className="ml-3 text-lg font-medium text-gray-900 capitalize">
+                    {category.name}
+                  </h3>
                 </div>
+                <span className="text-2xl font-bold text-gray-900">{total}</span>
               </div>
-              <span className="text-green-600 font-medium">+10 pts</span>
             </div>
-            <div className="flex items-center justify-between p-2">
-              <div className="flex items-center space-x-3">
-                <span className="text-xl">🚰</span>
-                <div>
-                  <p className="font-medium">Used Reusable Bottle</p>
-                  <p className="text-sm text-gray-500">5 hours ago</p>
-                </div>
-              </div>
-              <span className="text-green-600 font-medium">+5 pts</span>
-            </div>
-          </div>
-        </div>
+          );
+        })}
+      </div>
+
+      <div className="mt-8">
+        <ImpactChart metrics={metrics} />
       </div>
     </div>
-  )
+  );
 } 
